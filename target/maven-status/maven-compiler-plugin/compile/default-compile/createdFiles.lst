@@ -1,4 +1,6 @@
 com\ipn\mx\BusquedaInformada\BusquedaInformada.class
 com\ipn\mx\BusquedaInformada\GraphicInterface.class
 com\ipn\mx\BusquedaInformada\GraphicInterface$2.class
+com\ipn\mx\BusquedaInformada\CollectorController.class
 com\ipn\mx\BusquedaInformada\GraphicInterface$1.class
+com\ipn\mx\BusquedaInformada\Node.class
