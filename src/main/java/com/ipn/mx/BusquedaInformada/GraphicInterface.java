@@ -329,5 +329,5 @@ public class GraphicInterface extends JFrame {
         this.buttonGrid.get(x_last).get(y_last).setIcon(oldImageIcon);
         this.buttonGrid.get(x_new).get(y_new).setIcon(newImageIconCollector);
     }
-
+    
 }

@@ -71,10 +71,13 @@ public class CollectorController {
 
         int[] lastPosition = new int[2];
 
+        int max = 0;
+
         int[] nearShip = getNearShip();
         this.x_nearShip = nearShip[0];
         this.y_nearShip = nearShip[1];
 
+        
         int countPosition = 0;
         int asignValue = 0;
         boolean creatingRoute = false;
@@ -115,6 +118,11 @@ public class CollectorController {
                     if (!nearShipPositions.isEmpty()) {                             //Hay una nave cerca         
                         this.hasMineral = false;
                         creatingRoute = false;
+                        rute.removeAll(rute);
+
+                        printBoard();
+                        Thread.sleep(500);
+
                     } else if (!nearCrumbPositions.isEmpty() && !creatingRoute) {   // Seguir la migaja mas grande
                         PriorityQueue<int[]> nearCrumb = new PriorityQueue<>(Comparator.comparingInt((int[] n) -> n[2]).reversed());
                         for (int[] pos : nearCrumbPositions) {
@@ -137,46 +145,61 @@ public class CollectorController {
                             rute.remove(0);
                             Collections.reverse(rute);
                             rute.remove(0);
+                            max = ++countPosition;
                         }
 
                         ArrayList<int[]> nextMove = new ArrayList<>();
                         nextMove.add(rute.get(0));
                         rute.remove(0);
-                        move(nextMove, 5);
+                        System.out.println("migaja" + countPosition);
+                        move(nextMove, countPosition);
 
                         asignValue = countPosition;
                     }
 
                     // Actualiza la interfaz
                     graphic.setBoard(lastPosition, new int[]{this.x_current, this.y_current}, hasMineral, asignValue);
-                    this.board = graphic.getBoardGame();
+                    //this.board = graphic.getBoardGame();
 
                     // NO LLEVA MINERAL
                 } else {
                     // Encontrar mineral
                     // Encontrar camino de migas
                     // Mover random
+
+                    asignValue = 0;
+
                     Thread.sleep(750);
                     nearPositions = getNearpositions(this.x_current, this.y_current);
                     for (int[] nearPosition : nearPositions) {
+                        if (this.board[nearPosition[0]][nearPosition[1]] < 0) {
+                            nearCrumbPositions.add(nearPosition);
+                            System.out.println("move: " + this.board[nearPosition[0]][nearPosition[1]]);
+                        }
                         switch (moveAvailable(nearPosition)) {
                             case 0 ->
                                 nearEmptyPositions.add(nearPosition);
                             case 3 ->
                                 nearMineralPositions.add(nearPosition);
                             default -> {
-                                if (moveAvailable(nearPosition) < 0) {
+                                if (this.board[nearPosition[0]][nearPosition[1]] < 0) {
+                                    System.out.println("s");
                                     nearCrumbPositions.add(nearPosition);
                                 }
                             }
                         }
                     }
 
+                    if (creatingRoute) {
+                        
+                    }
+                    
                     // PRIORIDAD DE COMPORTAMIENTO
                     if (!nearMineralPositions.isEmpty()) {               // Hay minerales cerca
                         asignValue = this.board[this.x_current][this.y_current];
                         move(nearMineralPositions, 0);
                         this.hasMineral = true;
+                        asignValue = 0;
                     } else if (!nearCrumbPositions.isEmpty()) {          // Seguir la migaja mas pequeña
                         PriorityQueue<int[]> nearCrumb = new PriorityQueue<>(Comparator.comparingInt(n -> n[2]));
                         for (int[] pos : nearCrumbPositions) {
@@ -186,15 +209,25 @@ public class CollectorController {
                         nearCrumbPositions.add(nearCrumb.peek());
 
                         // Se mueve al mas pequeño
-                        move(nearCrumbPositions, nearCrumb.peek()[2]);
+                        
+                        System.out.println("peek" + nearCrumb.peek()[2]);
+                        System.out.println("max" + max);
+                        if (nearCrumb.peek()[2] == max) {
+                            move(nearCrumbPositions, nearCrumb.peek()[2]);
                         asignValue = nearCrumb.peek()[2];
+                        } else {
+                            move(nearEmptyPositions, 0);
+                            asignValue = 0;
+                        }
+                        
+                        
                     } else if (!nearEmptyPositions.isEmpty()) {          // No hay nada   
                         move(nearEmptyPositions, 0);
                         asignValue = 0;
                     }
 
-                    graphic.setBoard(lastPosition, new int[]{this.x_current, this.y_current}, hasMineral, 0);
-                    this.board = graphic.getBoardGame();
+                    graphic.setBoard(lastPosition, new int[]{this.x_current, this.y_current}, hasMineral, asignValue);
+                    //this.board = graphic.getBoardGame();
                 }
             } catch (Exception e) {
                 System.out.println("DIE");
